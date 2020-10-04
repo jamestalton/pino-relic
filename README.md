@@ -18,8 +18,8 @@ node main.js | pino-relic --license 123 --common instance,method,status
 
 ## Options
 
-| option                       | description                              |
-| ---------------------------- | ---------------------------------------- |
-| -l, --license <key>          | new relic license key                    |
-| -i, --interval <milliseonds> | upload interval (upload compaction)      |
-| -c, --common <common fields> | common fields (upload size optimization) |
+| option                              | description                              |
+| ----------------------------------- | ---------------------------------------- |
+| -l, --license (key)                 | new relic license key                    |
+| -i, --interval (milliseonds)        | upload interval (upload compaction)      |
+| -c, --common (field1,field2,field3> | common fields (upload size optimization) |
