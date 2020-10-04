@@ -15,3 +15,11 @@ When using Pino the recommended practice is to pipe the output from the main nod
 ```
 node main.js | pino-relic --license 123 --common instance,method,status
 ```
+
+## Options
+
+| option                       | description                              |
+| ---------------------------- | ---------------------------------------- |
+| -l, --license <key>          | new relic license key                    |
+| -i, --interval <milliseonds> | upload interval (upload compaction)      |
+| -c, --common <common fields> | common fields (upload size optimization) |
