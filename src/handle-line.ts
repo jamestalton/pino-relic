@@ -13,7 +13,7 @@ function commaSeparatedList(value: string, dummyPrevious: string[]) {
 const packageJson = JSON.parse(readFileSync('package.json').toString()) as { version: string }
 program
     .version(packageJson.version)
-    .requiredOption('-l, --license <key>', 'new relic license key')
+    .option('-l, --license <key>', 'new relic license key')
     .option('-i, --interval <milliseonds>', 'upload interval')
     .option('-c, --common <common fields>', 'common fields', commaSeparatedList)
     .parse(process.argv)
@@ -82,26 +82,28 @@ export function addLogObject(jsonObject: Record<string, unknown>, logs: ILogGrou
 }
 
 export function handleLine(line: string): string {
-    line = line.trim()
-    if (line.startsWith('{') || line.startsWith('[')) {
-        if (line.endsWith(',')) line = line.substr(0, line.length - 1)
-        try {
-            const json = JSON.parse(line) as Record<string, unknown> | Record<string, unknown>[]
-            if (Array.isArray(json)) {
-                for (const item of json) {
-                    addLogObject(item, logs)
+    if (program.license) {
+        line = line.trim()
+        if (line.startsWith('{') || line.startsWith('[')) {
+            if (line.endsWith(',')) line = line.substr(0, line.length - 1)
+            try {
+                const json = JSON.parse(line) as Record<string, unknown> | Record<string, unknown>[]
+                if (Array.isArray(json)) {
+                    for (const item of json) {
+                        addLogObject(item, logs)
+                    }
+                } else {
+                    addLogObject(json, logs)
                 }
-            } else {
-                addLogObject(json, logs)
+            } catch (err) {
+                // Do Nothing
             }
-        } catch (err) {
-            // Do Nothing
+        }
+        if (!uploadInterval || logs.length > 1000) {
+            upload()
         }
     }
-    if (!uploadInterval || logs.length > 1000) {
-        upload()
-    }
-    return line
+    return line + '\n'
 }
 
 const optionsJson = {
