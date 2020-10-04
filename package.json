@@ -1,0 +1,80 @@
+{
+    "name": "pino-relic",
+    "version": "1.0.0",
+    "description": "New Relic Logs for Pino logging",
+    "author": "James Talton <talton@gmail.com>",
+    "license": "MIT",
+    "homepage": "https://github.com/jamestalton/pino-relic#readme",
+    "bugs": {
+        "url": "https://github.com/jamestalton/pino-relic/issues"
+    },
+    "keywords": [
+        "pino"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/jamestalton/pino-relic.git"
+    },
+    "bin": {
+        "pino-relic": "./lib/pino-relic.js"
+    },
+    "scripts": {
+        "build": "rm -rf lib && tsc",
+        "lint": "eslint src --ext .ts --max-warnings=0",
+        "lint:fix": "eslint src --ext .ts --fix",
+        "check": "prettier --check **/*.ts **/*.json !coverage/** !lib/** !**/package-lock.json",
+        "check:fix": "prettier --write **/*.ts **/*.json !coverage/** !lib/** !**/package-lock.json",
+        "update": "rm -rf package-lock.json node_modules && npx npm-check-updates -u && npm install && npm audit fix && npm dedup && npm run lint && npm run check"
+    },
+    "devDependencies": {
+        "@types/node": "^14.x.x",
+        "@typescript-eslint/eslint-plugin": "^4.3.0",
+        "@typescript-eslint/parser": "^4.3.0",
+        "eslint": "^7.10.0",
+        "eslint-config-prettier": "^6.12.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "prettier": "^2.1.2",
+        "ts-node": "^9.0.0",
+        "ts-node-dev": "^1.0.0-pre.63",
+        "typescript": "^4.0.3"
+    },
+    "prettier": {
+        "printWidth": 120,
+        "tabWidth": 4,
+        "semi": false,
+        "singleQuote": true
+    },
+    "eslintConfig": {
+        "parser": "@typescript-eslint/parser",
+        "parserOptions": {
+            "ecmaVersion": 2018,
+            "sourceType": "module",
+            "project": [
+                "./tsconfig.json"
+            ]
+        },
+        "extends": [
+            "eslint:recommended",
+            "plugin:@typescript-eslint/eslint-recommended",
+            "plugin:@typescript-eslint/recommended",
+            "plugin:@typescript-eslint/recommended-requiring-type-checking",
+            "prettier/@typescript-eslint",
+            "plugin:prettier/recommended"
+        ],
+        "rules": {
+            "@typescript-eslint/no-use-before-define": "off",
+            "@typescript-eslint/no-unused-vars": "off",
+            "@typescript-eslint/no-floating-promises": [
+                "error",
+                {
+                    "ignoreVoid": true
+                }
+            ],
+            "no-console": "error",
+            "no-process-exit": "error"
+        }
+    },
+    "dependencies": {
+        "commander": "^6.1.0"
+    }
+}

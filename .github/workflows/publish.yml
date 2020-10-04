@@ -1,0 +1,52 @@
+name: Publish
+
+on:
+    push:
+        branches: [master]
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Set up Node.js 12.x
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 12.x
+                  registry-url: https://registry.npmjs.org/
+
+            - name: Install Dependencies
+              run: npm ci
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Check
+              run: npm run check
+
+            - name: Build
+              run: npm run build
+
+            - name: Set up Git
+              run: |
+                  git config --global user.name "${GITHUB_ACTOR}"
+                  git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+            - name: Update Version
+              run: |
+                  npm version patch
+                  VERSION=v`cat package.json | jq -r .version`
+                  echo "::set-env name=VERSION::${VERSION}"
+
+            - name: Git Push Release
+              if: github.event_name != 'pull_request' && env.SKIP != '1'
+              run: |
+                  git push
+                  git push origin ${{ env.VERSION }}
+
+            - name: Publish
+              run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
