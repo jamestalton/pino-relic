@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { program } from 'commander'
-import { readFileSync } from 'fs'
 import { STATUS_CODES } from 'http'
 import { request } from 'https'
 import { gzip } from 'zlib'
@@ -10,9 +9,7 @@ function commaSeparatedList(value: string, dummyPrevious: string[]) {
     return value.split(',')
 }
 
-const packageJson = JSON.parse(readFileSync('package.json').toString()) as { version: string }
 program
-    .version(packageJson.version)
     .option('-l, --license <key>', 'new relic license key')
     .option('-i, --interval <milliseonds>', 'upload interval')
     .option('-c, --common <common fields>', 'common fields', commaSeparatedList)
