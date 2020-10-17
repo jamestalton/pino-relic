@@ -10,7 +10,7 @@ function commaSeparatedList(value: string, dummyPrevious: string[]) {
 }
 
 program
-    .option('-l, --license <key>', 'new relic license key')
+    .option('-l, --license <key>', 'new relic license key', 'DISABLE')
     .option('-i, --interval <milliseonds>', 'upload interval')
     .option('-c, --common <common fields>', 'common fields', commaSeparatedList)
     .parse(process.argv)
@@ -79,7 +79,7 @@ export function addLogObject(jsonObject: Record<string, unknown>, logs: ILogGrou
 }
 
 export function handleLine(line: string): string {
-    if (program.license) {
+    if (program.license && program.license !== 'DISABLE') {
         line = line.trim()
         if (line.startsWith('{') || line.startsWith('[')) {
             if (line.endsWith(',')) line = line.substr(0, line.length - 1)
@@ -99,11 +99,13 @@ export function handleLine(line: string): string {
         if (!uploadInterval || logs.length > 1000) {
             upload()
         }
+        return line + '\n'
+    } else {
+        return line
     }
-    return line + '\n'
 }
 
-const optionsJson = {
+const optionsJsonGzip = {
     host: 'log-api.newrelic.com',
     path: '/log/v1',
     method: 'POST',
@@ -114,18 +116,39 @@ const optionsJson = {
     },
 }
 
+const optionsJson = {
+    host: 'log-api.newrelic.com',
+    path: '/log/v1',
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-License-Key': program.license as string,
+    },
+}
+
 function upload() {
     if (logs.length === 0) return
     const jsonString = JSON.stringify(logs)
     logs = []
-    gzip(jsonString, (err, buffer) => {
-        const req = request(optionsJson, (res) => {
-            if (res.statusCode >= 400) {
-                process.stderr.write(`New Relic Upload Error: ${res.statusCode} ${STATUS_CODES[res.statusCode]}\n`)
-            }
-        })
-        req.write(buffer)
-        req.end()
+    const jsonBuffer = Buffer.from(jsonString)
+    gzip(jsonBuffer, (err, buffer) => {
+        if (buffer.byteLength < jsonBuffer.byteLength) {
+            const req = request(optionsJsonGzip, (res) => {
+                if (res.statusCode >= 400) {
+                    process.stderr.write(`New Relic Upload Error: ${res.statusCode} ${STATUS_CODES[res.statusCode]}\n`)
+                }
+            })
+            req.write(buffer)
+            req.end()
+        } else {
+            const req = request(optionsJson, (res) => {
+                if (res.statusCode >= 400) {
+                    process.stderr.write(`New Relic Upload Error: ${res.statusCode} ${STATUS_CODES[res.statusCode]}\n`)
+                }
+            })
+            req.write(jsonBuffer)
+            req.end()
+        }
     })
 }
 
